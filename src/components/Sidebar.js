@@ -1,0 +1,56 @@
+'use client';
+
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+
+const navItems = [
+    { href: '/', label: 'Dashboard', icon: '🏠' },
+    { href: '/players', label: 'Players', icon: '👥' },
+    { href: '/teams', label: 'Teams', icon: '🏆' },
+    { href: '/auction', label: 'Auction', icon: '🔨' },
+    { href: '/scoreboard', label: 'Scoreboard', icon: '📊' },
+    { href: '/games', label: 'Games', icon: '🎮' },
+];
+
+export default function Sidebar() {
+    const pathname = usePathname();
+
+    return (
+        <aside className="fixed left-0 top-0 h-screen w-60 bg-gray-900 border-r border-gray-800 flex flex-col z-40">
+            {/* Logo */}
+            <div className="p-6 border-b border-gray-800">
+                <Link href="/" className="text-xl font-bold bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">
+                    🎉 Party Games
+                </Link>
+            </div>
+
+            {/* Navigation */}
+            <nav className="flex-1 p-4 space-y-1">
+                {navItems.map((item) => {
+                    const isActive = pathname === item.href ||
+                        (item.href !== '/' && pathname.startsWith(item.href));
+
+                    return (
+                        <Link
+                            key={item.href}
+                            href={item.href}
+                            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all
+                ${isActive
+                                    ? 'bg-purple-600 text-white'
+                                    : 'text-gray-400 hover:bg-gray-800 hover:text-white'
+                                }`}
+                        >
+                            <span className="text-xl">{item.icon}</span>
+                            <span className="font-medium">{item.label}</span>
+                        </Link>
+                    );
+                })}
+            </nav>
+
+            {/* Footer */}
+            <div className="p-4 border-t border-gray-800 text-xs text-gray-500 text-center">
+                All data stored locally
+            </div>
+        </aside>
+    );
+}

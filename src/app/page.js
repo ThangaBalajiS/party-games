@@ -1,65 +1,203 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
+import { useParty } from '@/context/PartyContext';
+import Link from 'next/link';
+
+export default function HomePage() {
+  const { players, teams, settings, resetAll, resetAuction, getUnsoldPlayers, isLoaded } = useParty();
+
+  const unsoldPlayers = getUnsoldPlayers();
+  const captains = players.filter(p => p.isCaptain);
+
+  const handleResetAll = () => {
+    if (confirm('⚠️ This will delete ALL data (players, teams, auction results). Are you sure?')) {
+      resetAll();
+    }
+  };
+
+  const handleResetAuction = () => {
+    if (confirm('This will reset the auction (keep players and teams, but unsell all players). Continue?')) {
+      resetAuction();
+    }
+  };
+
+  if (!isLoaded) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-2xl text-gray-400">Loading...</div>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.js file.
+    <div className="min-h-screen p-4 md:p-8">
+      <div className="max-w-6xl mx-auto">
+        {/* Hero */}
+        <div className="text-center mb-12 pt-8">
+          <h1 className="text-5xl md:text-7xl font-bold mb-4">
+            <span className="bg-gradient-to-r from-purple-400 via-pink-500 to-orange-400 bg-clip-text text-transparent">
+              Party Games
+            </span>
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          <p className="text-xl text-gray-400">
+            Team Auction & Scoreboard
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        {/* Stats */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
+          <div className="bg-gray-900 rounded-2xl p-6 text-center border border-gray-800">
+            <div className="text-4xl font-bold text-purple-400">{players.length}</div>
+            <div className="text-gray-400 mt-1">Players</div>
+          </div>
+          <div className="bg-gray-900 rounded-2xl p-6 text-center border border-gray-800">
+            <div className="text-4xl font-bold text-blue-400">{teams.length}</div>
+            <div className="text-gray-400 mt-1">Teams</div>
+          </div>
+          <div className="bg-gray-900 rounded-2xl p-6 text-center border border-gray-800">
+            <div className="text-4xl font-bold text-yellow-400">{captains.length}</div>
+            <div className="text-gray-400 mt-1">Captains</div>
+          </div>
+          <div className="bg-gray-900 rounded-2xl p-6 text-center border border-gray-800">
+            <div className="text-4xl font-bold text-orange-400">{unsoldPlayers.length}</div>
+            <div className="text-gray-400 mt-1">Unsold</div>
+          </div>
         </div>
-      </main>
+
+        {/* Main Actions */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+          {/* Add Players */}
+          <Link
+            href="/players"
+            className="group bg-gradient-to-br from-purple-900 to-purple-950 rounded-3xl p-8 
+                       border border-purple-700 hover:border-purple-500 transition-all
+                       hover:scale-[1.02] active:scale-[0.98]"
+          >
+            <div className="text-5xl mb-4">👥</div>
+            <h2 className="text-2xl font-bold mb-2">Add Players</h2>
+            <p className="text-gray-400">Upload photos and add party guests</p>
+            {players.length > 0 && (
+              <div className="mt-4 text-purple-400 text-sm">
+                {players.length} players added
+              </div>
+            )}
+          </Link>
+
+          {/* Create Teams */}
+          <Link
+            href="/teams"
+            className="group bg-gradient-to-br from-blue-900 to-blue-950 rounded-3xl p-8 
+                       border border-blue-700 hover:border-blue-500 transition-all
+                       hover:scale-[1.02] active:scale-[0.98]"
+          >
+            <div className="text-5xl mb-4">🏆</div>
+            <h2 className="text-2xl font-bold mb-2">Create Teams</h2>
+            <p className="text-gray-400">Set up teams and assign captains</p>
+            {teams.length > 0 && (
+              <div className="mt-4 text-blue-400 text-sm">
+                {teams.length} teams • {captains.length} captains
+              </div>
+            )}
+          </Link>
+
+          {/* Auction */}
+          <Link
+            href="/auction"
+            className={`group bg-gradient-to-br from-orange-900 to-red-950 rounded-3xl p-8 
+                       border transition-all hover:scale-[1.02] active:scale-[0.98]
+                       ${teams.length >= 2 && captains.length >= 2
+                ? 'border-orange-700 hover:border-orange-500'
+                : 'border-gray-700 opacity-60'}`}
+          >
+            <div className="text-5xl mb-4">🔨</div>
+            <h2 className="text-2xl font-bold mb-2">Player Auction</h2>
+            <p className="text-gray-400">
+              {teams.length >= 2 && captains.length >= 2
+                ? 'Bid on players for your team!'
+                : 'Need 2+ teams with captains first'}
+            </p>
+            {settings.auctionStatus === 'completed' && (
+              <div className="mt-4 text-green-400 text-sm">
+                ✓ Auction completed
+              </div>
+            )}
+            {settings.auctionStatus !== 'completed' && unsoldPlayers.length > 0 && (
+              <div className="mt-4 text-orange-400 text-sm">
+                {unsoldPlayers.length} players to auction
+              </div>
+            )}
+          </Link>
+
+          {/* Scoreboard */}
+          <Link
+            href="/scoreboard"
+            className={`group bg-gradient-to-br from-green-900 to-emerald-950 rounded-3xl p-8 
+                       border transition-all hover:scale-[1.02] active:scale-[0.98]
+                       ${teams.length >= 1
+                ? 'border-green-700 hover:border-green-500'
+                : 'border-gray-700 opacity-60'}`}
+          >
+            <div className="text-5xl mb-4">📊</div>
+            <h2 className="text-2xl font-bold mb-2">Scoreboard</h2>
+            <p className="text-gray-400">Track scores during games</p>
+            {teams.length > 0 && (
+              <div className="mt-4 text-green-400 text-sm">
+                {teams.map(t => `${t.name}: ${t.score}`).join(' • ')}
+              </div>
+            )}
+          </Link>
+        </div>
+
+        {/* Quick Status */}
+        {teams.length > 0 && (
+          <div className="bg-gray-900 rounded-3xl p-6 border border-gray-800 mb-8">
+            <h3 className="text-xl font-bold mb-4">Teams Overview</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {teams.map((team) => {
+                const captain = players.find(p => p.id === team.captainId);
+                const teamPlayerCount = players.filter(p => p.teamId === team.id).length;
+
+                return (
+                  <div
+                    key={team.id}
+                    className="p-4 rounded-xl bg-gray-800 border-l-4"
+                    style={{ borderLeftColor: team.color }}
+                  >
+                    <div className="font-bold" style={{ color: team.color }}>{team.name}</div>
+                    <div className="text-sm text-gray-400 mt-1">
+                      {captain ? `👑 ${captain.name}` : 'No captain'}
+                    </div>
+                    <div className="flex items-center justify-between mt-2 text-sm">
+                      <span className="text-gray-400">{teamPlayerCount} members</span>
+                      <span className="text-green-400">₹{team.budget}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Reset Options */}
+        <div className="flex flex-wrap gap-4 justify-center pt-8 border-t border-gray-800">
+          {settings.auctionStatus !== 'pending' && (
+            <button
+              onClick={handleResetAuction}
+              className="px-6 py-3 bg-yellow-900/30 border border-yellow-700 rounded-xl
+                         text-yellow-400 hover:bg-yellow-900/50 transition-colors"
+            >
+              🔄 Reset Auction
+            </button>
+          )}
+          <button
+            onClick={handleResetAll}
+            className="px-6 py-3 bg-red-900/30 border border-red-700 rounded-xl
+                       text-red-400 hover:bg-red-900/50 transition-colors"
+          >
+            🗑️ Reset All Data
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
