@@ -36,7 +36,7 @@ export default function HomePage() {
         <div className="text-center mb-12 pt-8">
           <h1 className="text-5xl md:text-7xl font-bold mb-4">
             <span className="bg-gradient-to-r from-purple-400 via-pink-500 to-orange-400 bg-clip-text text-transparent">
-              Party Games
+              Buffaloes New Year Party
             </span>
           </h1>
           <p className="text-xl text-gray-400">
