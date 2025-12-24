@@ -11,7 +11,22 @@ const GAMES = [
         color: 'from-pink-600 to-purple-600',
         href: '/games/popular-song',
     },
-    // Future games can be added here
+    {
+        id: 'dumb-charades',
+        name: 'Dumb Charades',
+        description: 'Act out movies without speaking - guess before time runs out!',
+        icon: '🎭',
+        color: 'from-orange-600 to-red-600',
+        href: '/games/dumb-charades',
+    },
+    {
+        id: 'pictionary',
+        name: 'Pictionary',
+        description: 'Draw and guess - faster guesses earn more points!',
+        icon: '🎨',
+        color: 'from-blue-600 to-cyan-600',
+        href: '/games/pictionary',
+    },
 ];
 
 export default function GamesPage() {

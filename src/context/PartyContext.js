@@ -140,25 +140,59 @@ export function PartyProvider({ children }) {
         return [...album.songs].sort((a, b) => b.streams - a.streams);
     }, [albums]);
 
-    // Calculate score for Popular Song game
-    // 1 correct = 10 points, 2 correct = 25 points, 3 correct = 50 points
+    // Calculate score for Popular Song game with smart partial credit
+    // - Song in top 3: +5 pts each (any order)
+    // - Exact position match: +5 pts each
+    // - Got #1 right anywhere: +5 pts bonus
+    // - Perfect round (3/3 exact): +15 pts bonus
     const calculateSongScore = useCallback((albumId, teamAnswers) => {
         const sortedSongs = getSortedSongs(albumId);
-        if (sortedSongs.length < 3) return 0;
+        if (sortedSongs.length < 3) return { total: 0, breakdown: {} };
 
-        const correctRanking = sortedSongs.slice(0, 3).map(s => s.id);
-        let correctCount = 0;
+        const correctTop3 = sortedSongs.slice(0, 3);
+        const correctTop3Ids = correctTop3.map(s => s.id);
+        const mostPopularId = correctTop3Ids[0];
+
+        // Calculate each component
+        let songsInTop3 = 0;
+        let exactMatches = 0;
+        let hasNumber1 = false;
 
         teamAnswers.forEach((answerId, index) => {
-            if (answerId === correctRanking[index]) {
-                correctCount++;
+            if (correctTop3Ids.includes(answerId)) {
+                songsInTop3++;
+                if (answerId === correctTop3Ids[index]) {
+                    exactMatches++;
+                }
+            }
+            if (answerId === mostPopularId) {
+                hasNumber1 = true;
             }
         });
 
-        if (correctCount === 3) return 50;
-        if (correctCount === 2) return 25;
-        if (correctCount === 1) return 10;
-        return 0;
+        const isPerfect = exactMatches === 3;
+
+        // Point calculations
+        const inTop3Points = songsInTop3 * 5;
+        const exactMatchPoints = exactMatches * 5;
+        const number1Bonus = hasNumber1 ? 5 : 0;
+        const perfectBonus = isPerfect ? 15 : 0;
+
+        const total = inTop3Points + exactMatchPoints + number1Bonus + perfectBonus;
+
+        return {
+            total,
+            breakdown: {
+                songsInTop3,
+                exactMatches,
+                hasNumber1,
+                isPerfect,
+                inTop3Points,
+                exactMatchPoints,
+                number1Bonus,
+                perfectBonus
+            }
+        };
     }, [getSortedSongs]);
 
     // Reset functions

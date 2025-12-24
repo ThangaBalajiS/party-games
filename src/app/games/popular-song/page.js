@@ -46,15 +46,16 @@ export default function PopularSongPage() {
 
         teams.forEach(team => {
             const answers = teamAnswers[team.id] || ['', '', ''];
-            const score = calculateSongScore(selectedAlbumId, answers);
+            const scoreResult = calculateSongScore(selectedAlbumId, answers);
             scores[team.id] = {
-                score,
+                score: scoreResult.total,
+                breakdown: scoreResult.breakdown,
                 answers: answers.map(id => selectedAlbum.songs.find(s => s.id === id)),
                 correct: correctTop3,
             };
 
             // Update team's total score
-            updateTeam(team.id, { score: team.score + score });
+            updateTeam(team.id, { score: team.score + scoreResult.total });
         });
 
         setRoundScores(scores);
@@ -316,6 +317,8 @@ export default function PopularSongPage() {
                                 const result = roundScores[team.id];
                                 if (!result) return null;
 
+                                const correctTop3Ids = result.correct.map(s => s.id);
+
                                 return (
                                     <div
                                         key={team.id}
@@ -331,13 +334,16 @@ export default function PopularSongPage() {
                                             </div>
                                         </div>
 
-                                        <div className="space-y-2">
+                                        {/* Answer breakdown */}
+                                        <div className="space-y-2 mb-4">
                                             {result.answers.map((answer, i) => {
-                                                const isCorrect = answer?.id === result.correct[i]?.id;
+                                                const isExact = answer?.id === result.correct[i]?.id;
+                                                const isInTop3 = answer?.id && correctTop3Ids.includes(answer.id);
                                                 return (
                                                     <div
                                                         key={i}
-                                                        className={`flex items-center gap-3 p-3 rounded-lg ${isCorrect ? 'bg-green-900/30' : 'bg-red-900/30'
+                                                        className={`flex items-center gap-3 p-3 rounded-lg ${isExact ? 'bg-green-900/40 ring-2 ring-green-500' :
+                                                                isInTop3 ? 'bg-yellow-900/30' : 'bg-red-900/30'
                                                             }`}
                                                     >
                                                         <span className="text-xl">
@@ -346,13 +352,45 @@ export default function PopularSongPage() {
                                                         <span className="flex-grow">
                                                             {answer?.title || '(not selected)'}
                                                         </span>
-                                                        <span className="text-xl">
-                                                            {isCorrect ? '✅' : '❌'}
+                                                        <span className="text-sm">
+                                                            {isExact ? (
+                                                                <span className="text-green-400">✓ Exact +10</span>
+                                                            ) : isInTop3 ? (
+                                                                <span className="text-yellow-400">✓ Top 3 +5</span>
+                                                            ) : (
+                                                                <span className="text-red-400">✗</span>
+                                                            )}
                                                         </span>
                                                     </div>
                                                 );
                                             })}
                                         </div>
+
+                                        {/* Score breakdown */}
+                                        {result.breakdown && (
+                                            <div className="text-sm border-t border-gray-700 pt-3 space-y-1">
+                                                <div className="flex justify-between text-gray-400">
+                                                    <span>Songs in top 3:</span>
+                                                    <span>{result.breakdown.songsInTop3} × 5 = {result.breakdown.inTop3Points}</span>
+                                                </div>
+                                                <div className="flex justify-between text-gray-400">
+                                                    <span>Exact positions:</span>
+                                                    <span>{result.breakdown.exactMatches} × 5 = {result.breakdown.exactMatchPoints}</span>
+                                                </div>
+                                                {result.breakdown.hasNumber1 && (
+                                                    <div className="flex justify-between text-yellow-400">
+                                                        <span>🌟 Got #1 bonus:</span>
+                                                        <span>+{result.breakdown.number1Bonus}</span>
+                                                    </div>
+                                                )}
+                                                {result.breakdown.isPerfect && (
+                                                    <div className="flex justify-between text-green-400 font-bold">
+                                                        <span>🎯 Perfect round!</span>
+                                                        <span>+{result.breakdown.perfectBonus}</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
                                     </div>
                                 );
                             })}
@@ -360,7 +398,9 @@ export default function PopularSongPage() {
 
                         {/* Scoring Guide */}
                         <div className="text-center text-gray-400 mb-8">
-                            <div className="text-sm">Scoring: 1 correct = 10 pts | 2 correct = 25 pts | 3 correct = 50 pts</div>
+                            <div className="text-sm">
+                                Songs in top 3: +5 each | Exact position: +5 each | #1 bonus: +5 | Perfect: +15
+                            </div>
                         </div>
 
                         <div className="text-center">
