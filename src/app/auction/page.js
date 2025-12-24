@@ -7,7 +7,7 @@ import Link from 'next/link';
 export default function AuctionPage() {
     const {
         players, teams, settings,
-        sellPlayer, updateSettings, getUnsoldPlayers, getTeamPlayers,
+        sellPlayer, tradePlayers, updateSettings, getUnsoldPlayers, getTeamPlayers,
         isLoaded
     } = useParty();
 
@@ -15,6 +15,13 @@ export default function AuctionPage() {
     const [highestBidder, setHighestBidder] = useState(null);
     const [showSoldAnimation, setShowSoldAnimation] = useState(false);
     const [soldToTeam, setSoldToTeam] = useState(null);
+
+    // Trade modal state
+    const [showTradeModal, setShowTradeModal] = useState(false);
+    const [tradeTeam1Id, setTradeTeam1Id] = useState('');
+    const [tradeTeam2Id, setTradeTeam2Id] = useState('');
+    const [tradePlayer1Id, setTradePlayer1Id] = useState('');
+    const [tradePlayer2Id, setTradePlayer2Id] = useState('');
 
     const unsoldPlayers = getUnsoldPlayers();
     const currentPlayer = unsoldPlayers[settings.currentPlayerIndex] || unsoldPlayers[0];
@@ -73,6 +80,35 @@ export default function AuctionPage() {
         updateSettings({ auctionStatus: 'completed' });
     };
 
+    // Trade functionality
+    const handleOpenTradeModal = () => {
+        setShowTradeModal(true);
+        setTradeTeam1Id('');
+        setTradeTeam2Id('');
+        setTradePlayer1Id('');
+        setTradePlayer2Id('');
+    };
+
+    const handleExecuteTrade = () => {
+        if (!tradePlayer1Id || !tradePlayer2Id || !tradeTeam1Id || !tradeTeam2Id) {
+            alert('Please select both players to trade');
+            return;
+        }
+
+        // Swap the players' teams atomically
+        tradePlayers(tradePlayer1Id, tradePlayer2Id);
+
+        // Close modal and reset
+        setShowTradeModal(false);
+        setTradeTeam1Id('');
+        setTradeTeam2Id('');
+        setTradePlayer1Id('');
+        setTradePlayer2Id('');
+    };
+
+    const team1Players = tradeTeam1Id ? getTeamPlayers(tradeTeam1Id).filter(p => !p.isCaptain) : [];
+    const team2Players = tradeTeam2Id ? getTeamPlayers(tradeTeam2Id).filter(p => !p.isCaptain) : [];
+
     if (!isLoaded) {
         return (
             <div className="min-h-screen flex items-center justify-center">
@@ -104,6 +140,144 @@ export default function AuctionPage() {
     if (unsoldPlayers.length === 0 || settings.auctionStatus === 'completed') {
         return (
             <div className="min-h-screen p-8">
+                {/* Trade Modal */}
+                {showTradeModal && (
+                    <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+                        <div className="bg-gray-900 rounded-2xl p-6 max-w-2xl w-full border border-gray-700">
+                            <div className="flex items-center justify-between mb-6">
+                                <h2 className="text-2xl font-bold">🔄 Trade Players</h2>
+                                <button
+                                    onClick={() => setShowTradeModal(false)}
+                                    className="text-gray-400 hover:text-white text-2xl"
+                                >
+                                    ×
+                                </button>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-6">
+                                {/* Team 1 Selection */}
+                                <div>
+                                    <label className="block text-gray-400 mb-2 text-sm">Team 1</label>
+                                    <select
+                                        value={tradeTeam1Id}
+                                        onChange={(e) => {
+                                            setTradeTeam1Id(e.target.value);
+                                            setTradePlayer1Id('');
+                                        }}
+                                        className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl
+                                            focus:outline-none focus:ring-2 focus:ring-blue-500 text-white mb-3"
+                                    >
+                                        <option value="">Select team...</option>
+                                        {teams.filter(t => t.id !== tradeTeam2Id).map((team) => (
+                                            <option key={team.id} value={team.id}>{team.name}</option>
+                                        ))}
+                                    </select>
+
+                                    {tradeTeam1Id && (
+                                        <>
+                                            <label className="block text-gray-400 mb-2 text-sm">Player to give</label>
+                                            <select
+                                                value={tradePlayer1Id}
+                                                onChange={(e) => setTradePlayer1Id(e.target.value)}
+                                                className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl
+                                                    focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"
+                                            >
+                                                <option value="">Select player...</option>
+                                                {team1Players.map((player) => (
+                                                    <option key={player.id} value={player.id}>
+                                                        {player.name} (₹{player.soldPrice})
+                                                    </option>
+                                                ))}
+                                            </select>
+                                            {team1Players.length === 0 && (
+                                                <p className="text-gray-500 text-sm mt-2">No tradeable players (captains cannot be traded)</p>
+                                            )}
+                                        </>
+                                    )}
+                                </div>
+
+                                {/* Team 2 Selection */}
+                                <div>
+                                    <label className="block text-gray-400 mb-2 text-sm">Team 2</label>
+                                    <select
+                                        value={tradeTeam2Id}
+                                        onChange={(e) => {
+                                            setTradeTeam2Id(e.target.value);
+                                            setTradePlayer2Id('');
+                                        }}
+                                        className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl
+                                            focus:outline-none focus:ring-2 focus:ring-blue-500 text-white mb-3"
+                                    >
+                                        <option value="">Select team...</option>
+                                        {teams.filter(t => t.id !== tradeTeam1Id).map((team) => (
+                                            <option key={team.id} value={team.id}>{team.name}</option>
+                                        ))}
+                                    </select>
+
+                                    {tradeTeam2Id && (
+                                        <>
+                                            <label className="block text-gray-400 mb-2 text-sm">Player to give</label>
+                                            <select
+                                                value={tradePlayer2Id}
+                                                onChange={(e) => setTradePlayer2Id(e.target.value)}
+                                                className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl
+                                                    focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"
+                                            >
+                                                <option value="">Select player...</option>
+                                                {team2Players.map((player) => (
+                                                    <option key={player.id} value={player.id}>
+                                                        {player.name} (₹{player.soldPrice})
+                                                    </option>
+                                                ))}
+                                            </select>
+                                            {team2Players.length === 0 && (
+                                                <p className="text-gray-500 text-sm mt-2">No tradeable players (captains cannot be traded)</p>
+                                            )}
+                                        </>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Trade Preview */}
+                            {tradePlayer1Id && tradePlayer2Id && (
+                                <div className="mt-6 p-4 bg-gray-800 rounded-xl">
+                                    <div className="text-center text-gray-400 mb-2">Trade Preview</div>
+                                    <div className="flex items-center justify-center gap-4">
+                                        <div className="text-center">
+                                            <div className="font-bold">{players.find(p => p.id === tradePlayer1Id)?.name}</div>
+                                            <div className="text-sm text-gray-500">→ {teams.find(t => t.id === tradeTeam2Id)?.name}</div>
+                                        </div>
+                                        <div className="text-2xl">🔄</div>
+                                        <div className="text-center">
+                                            <div className="font-bold">{players.find(p => p.id === tradePlayer2Id)?.name}</div>
+                                            <div className="text-sm text-gray-500">→ {teams.find(t => t.id === tradeTeam1Id)?.name}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Action Buttons */}
+                            <div className="flex gap-4 mt-6">
+                                <button
+                                    onClick={() => setShowTradeModal(false)}
+                                    className="flex-1 px-6 py-3 bg-gray-700 rounded-xl font-medium hover:bg-gray-600"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handleExecuteTrade}
+                                    disabled={!tradePlayer1Id || !tradePlayer2Id}
+                                    className="flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl
+                                        font-bold hover:from-blue-500 hover:to-purple-500
+                                        disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    Confirm Trade
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 <div className="max-w-6xl mx-auto">
                     <div className="text-center mb-12">
                         <div className="text-8xl mb-4">🎉</div>
@@ -111,6 +285,17 @@ export default function AuctionPage() {
                             Auction Complete!
                         </h1>
                         <p className="text-gray-400">All players have been assigned to teams</p>
+                    </div>
+
+                    {/* Trade Button */}
+                    <div className="flex justify-center mb-8">
+                        <button
+                            onClick={handleOpenTradeModal}
+                            className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl
+                                font-bold hover:from-blue-500 hover:to-purple-500 transition-all"
+                        >
+                            🔄 Trade Players
+                        </button>
                     </div>
 
                     {/* Final Teams */}
@@ -401,3 +586,4 @@ export default function AuctionPage() {
         </div>
     );
 }
+

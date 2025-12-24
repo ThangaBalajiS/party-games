@@ -27,6 +27,14 @@ const GAMES = [
         color: 'from-blue-600 to-cyan-600',
         href: '/games/pictionary',
     },
+    {
+        id: 'pen-fight',
+        name: 'Pen Fight',
+        description: 'Battle of the pens! Track knockouts and score points.',
+        icon: '🖊️',
+        color: 'from-green-600 to-emerald-600',
+        href: '/games/pen-fight',
+    },
 ];
 
 export default function GamesPage() {

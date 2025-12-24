@@ -46,6 +46,24 @@ export function PartyProvider({ children }) {
         setPlayers((prev) => prev.map((p) => (p.id === id ? { ...p, ...updates } : p)));
     }, [setPlayers]);
 
+    // Trade players between teams - atomic swap
+    const tradePlayers = useCallback((player1Id, player2Id) => {
+        setPlayers((prev) => {
+            const player1 = prev.find(p => p.id === player1Id);
+            const player2 = prev.find(p => p.id === player2Id);
+            if (!player1 || !player2) return prev;
+
+            const team1Id = player1.teamId;
+            const team2Id = player2.teamId;
+
+            return prev.map((p) => {
+                if (p.id === player1Id) return { ...p, teamId: team2Id };
+                if (p.id === player2Id) return { ...p, teamId: team1Id };
+                return p;
+            });
+        });
+    }, [setPlayers]);
+
     const deletePlayer = useCallback((id) => {
         setPlayers((prev) => prev.filter((p) => p.id !== id));
         // Also remove as captain if assigned
@@ -241,6 +259,7 @@ export function PartyProvider({ children }) {
         addPlayer,
         updatePlayer,
         deletePlayer,
+        tradePlayers,
 
         // Team actions
         addTeam,
