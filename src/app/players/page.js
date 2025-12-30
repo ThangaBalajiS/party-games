@@ -2,6 +2,7 @@
 
 import { useState, useRef } from 'react';
 import { useParty } from '@/context/PartyContext';
+import { formatPriceWithSymbol } from '@/lib/formatPrice';
 import Link from 'next/link';
 
 export default function PlayersPage() {
@@ -168,6 +169,11 @@ export default function PlayersPage() {
                                 {/* Player Name */}
                                 <div className="text-center font-medium truncate" title={player.name}>
                                     {player.name}
+                                    {player.soldPrice && (
+                                        <div className="text-green-400 text-sm font-bold mt-1">
+                                            {formatPriceWithSymbol(player.soldPrice)}
+                                        </div>
+                                    )}
                                 </div>
 
                                 {/* Captain Badge */}

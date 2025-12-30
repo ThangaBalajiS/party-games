@@ -9,9 +9,24 @@ export async function PATCH(request, { params }) {
         const { id } = await params;
         const body = await request.json();
 
+        // Separate array push operation from regular updates
+        const { beerPongAddPlayerId, ...regularUpdates } = body;
+        
+        let updateQuery = {};
+        
+        // Handle regular field updates
+        if (Object.keys(regularUpdates).length > 0) {
+            updateQuery.$set = regularUpdates;
+        }
+        
+        // Handle adding player ID to array using $push
+        if (beerPongAddPlayerId) {
+            updateQuery.$push = { beerPongPlayedPlayerIds: beerPongAddPlayerId };
+        }
+
         const team = await Team.findByIdAndUpdate(
             id,
-            { $set: body },
+            updateQuery,
             { new: true }
         );
 
@@ -26,6 +41,14 @@ export async function PATCH(request, { params }) {
             captainId: team.captainId,
             budget: team.budget,
             score: team.score,
+            guessTheWordRounds: team.guessTheWordRounds || 0,
+            dumbCharadesRounds: team.dumbCharadesRounds || 0,
+            pictionaryRounds: team.pictionaryRounds || 0,
+            penFightRounds: team.penFightRounds || 0,
+            beerPongRounds: team.beerPongRounds || 0,
+            beerPongPlayersPlayed: team.beerPongPlayersPlayed || 0,
+            beerPongPlayedPlayerIds: team.beerPongPlayedPlayerIds || [],
+            beerPongTotalScore: team.beerPongTotalScore || 0,
             createdAt: team.createdAt?.toISOString() || new Date().toISOString(),
         };
 

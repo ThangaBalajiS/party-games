@@ -22,6 +22,39 @@ const TeamSchema = new mongoose.Schema({
         type: Number,
         default: 0,
     },
+    // Game progress tracking
+    guessTheWordRounds: {
+        type: Number,
+        default: 0,
+    },
+    dumbCharadesRounds: {
+        type: Number,
+        default: 0,
+    },
+    pictionaryRounds: {
+        type: Number,
+        default: 0,
+    },
+    penFightRounds: {
+        type: Number,
+        default: 0,
+    },
+    beerPongRounds: {
+        type: Number,
+        default: 0,
+    },
+    beerPongPlayersPlayed: {
+        type: Number,
+        default: 0,
+    },
+    beerPongPlayedPlayerIds: {
+        type: [String],
+        default: [],
+    },
+    beerPongTotalScore: {
+        type: Number,
+        default: 0,
+    },
     createdAt: {
         type: Date,
         default: Date.now,

@@ -1,6 +1,7 @@
 'use client';
 
 import { useParty } from '@/context/PartyContext';
+import { formatPriceWithSymbol } from '@/lib/formatPrice';
 import Link from 'next/link';
 
 export default function HomePage() {
@@ -169,7 +170,7 @@ export default function HomePage() {
                     </div>
                     <div className="flex items-center justify-between mt-2 text-sm">
                       <span className="text-gray-400">{teamPlayerCount} members</span>
-                      <span className="text-green-400">₹{team.budget}</span>
+                      <span className="text-green-400">{formatPriceWithSymbol(team.budget)}</span>
                     </div>
                   </div>
                 );

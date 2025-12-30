@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useParty } from '@/context/PartyContext';
+import { formatPriceWithSymbol } from '@/lib/formatPrice';
 import Link from 'next/link';
 
 export default function ScoreboardPage() {
@@ -182,6 +183,9 @@ export default function ScoreboardPage() {
                                                         )}
                                                     </div>
                                                     <span className="text-sm">{player.name}</span>
+                                                    {player.soldPrice && (
+                                                        <span className="text-gray-400 text-xs">({formatPriceWithSymbol(player.soldPrice)})</span>
+                                                    )}
                                                 </div>
                                             ))}
                                         </div>

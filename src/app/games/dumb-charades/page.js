@@ -76,8 +76,12 @@ export default function DumbCharadesPage() {
     const handleConfirmScore = () => {
         const score = calculateScore();
         const team = teams.find((t) => t.id === selectedTeamId);
-        if (team && score.total > 0) {
-            updateTeam(selectedTeamId, { score: team.score + score.total });
+        if (team) {
+            // Update score AND increment dumbCharadesRounds in database
+            updateTeam(selectedTeamId, { 
+                score: team.score + score.total,
+                dumbCharadesRounds: (team.dumbCharadesRounds || 0) + 1
+            });
         }
         setLastRoundScore(score);
         resetForNextRound();

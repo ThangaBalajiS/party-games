@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useParty } from '@/context/PartyContext';
+import { formatPriceWithSymbol } from '@/lib/formatPrice';
 import Link from 'next/link';
 
 const TEAM_COLORS = [
@@ -224,7 +225,10 @@ export default function TeamsPage() {
                                                 </div>
                                                 <div>
                                                     <div className="font-bold">{captain.name}</div>
-                                                    <div className="text-xs text-yellow-400">👑 Team Captain</div>
+                                                    <div className="text-xs text-yellow-400">
+                                                        👑 Team Captain 
+                                                        {captain.soldPrice && <span className="text-green-400 ml-1">({formatPriceWithSymbol(captain.soldPrice)})</span>}
+                                                    </div>
                                                 </div>
                                                 <button
                                                     onClick={() => setSelectingCaptainFor(team.id)}
@@ -291,7 +295,12 @@ export default function TeamsPage() {
                                                     <div className="w-full h-full flex items-center justify-center text-2xl">👤</div>
                                                 )}
                                             </div>
-                                            <div className="text-center font-medium truncate">{player.name}</div>
+                                            <div className="text-center font-medium truncate">
+                                                {player.name}
+                                                {player.soldPrice && (
+                                                    <div className="text-xs text-green-400">({formatPriceWithSymbol(player.soldPrice)})</div>
+                                                )}
+                                            </div>
                                         </button>
                                     ))}
                                 </div>

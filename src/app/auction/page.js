@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParty } from '@/context/PartyContext';
+import { formatPrice, formatPriceWithSymbol } from '@/lib/formatPrice';
 import Link from 'next/link';
 
 export default function AuctionPage() {
@@ -15,6 +16,7 @@ export default function AuctionPage() {
     const [highestBidder, setHighestBidder] = useState(null);
     const [showSoldAnimation, setShowSoldAnimation] = useState(false);
     const [soldToTeam, setSoldToTeam] = useState(null);
+    const [soldPrice, setSoldPrice] = useState(0);
 
     // Trade modal state
     const [showTradeModal, setShowTradeModal] = useState(false);
@@ -53,6 +55,7 @@ export default function AuctionPage() {
 
         const winningTeam = teams.find(t => t.id === highestBidder);
         setSoldToTeam(winningTeam);
+        setSoldPrice(currentBid);
         setShowSoldAnimation(true);
 
         // Sell the player
@@ -137,7 +140,7 @@ export default function AuctionPage() {
     }
 
     // Auction completed
-    if (unsoldPlayers.length === 0 || settings.auctionStatus === 'completed') {
+    if ((unsoldPlayers.length === 0 || settings.auctionStatus === 'completed') && !showSoldAnimation) {
         return (
             <div className="min-h-screen p-8">
                 {/* Trade Modal */}
@@ -185,7 +188,7 @@ export default function AuctionPage() {
                                                 <option value="">Select player...</option>
                                                 {team1Players.map((player) => (
                                                     <option key={player.id} value={player.id}>
-                                                        {player.name} (₹{player.soldPrice})
+                                                        {player.name} ({formatPriceWithSymbol(player.soldPrice)})
                                                     </option>
                                                 ))}
                                             </select>
@@ -226,7 +229,7 @@ export default function AuctionPage() {
                                                 <option value="">Select player...</option>
                                                 {team2Players.map((player) => (
                                                     <option key={player.id} value={player.id}>
-                                                        {player.name} (₹{player.soldPrice})
+                                                        {player.name} ({formatPriceWithSymbol(player.soldPrice)})
                                                     </option>
                                                 ))}
                                             </select>
@@ -318,7 +321,7 @@ export default function AuctionPage() {
                                     </div>
 
                                     <div className="text-gray-400 mb-4">
-                                        Remaining Budget: <span className="text-white font-bold">₹{team.budget}</span>
+                                        Remaining Budget: <span className="text-white font-bold">{formatPriceWithSymbol(team.budget)}</span>
                                     </div>
 
                                     <div className="space-y-2">
@@ -333,7 +336,7 @@ export default function AuctionPage() {
                                                     )}
                                                 </div>
                                                 <div className="flex-grow">
-                                                    <div className="font-medium">{captain.name}</div>
+                                                <div className="font-medium">{captain.name}</div>
                                                     <div className="text-xs text-yellow-400">👑 Captain</div>
                                                 </div>
                                             </div>
@@ -350,9 +353,9 @@ export default function AuctionPage() {
                                                     )}
                                                 </div>
                                                 <div className="flex-grow">
-                                                    <div className="font-medium">{player.name}</div>
+                                                    <div className="font-medium">{player.name} <span className="text-green-400">({formatPriceWithSymbol(player.soldPrice)})</span></div>
                                                 </div>
-                                                <div className="text-green-400 font-bold">₹{player.soldPrice}</div>
+
                                             </div>
                                         ))}
                                     </div>
@@ -393,7 +396,7 @@ export default function AuctionPage() {
                             to {soldToTeam.name}
                         </div>
                         <div className="text-4xl font-bold text-green-400 mt-4">
-                            ₹{currentBid}
+                            {formatPriceWithSymbol(soldPrice)}
                         </div>
                     </div>
                 </div>
@@ -448,7 +451,7 @@ export default function AuctionPage() {
                                     <div className="text-center mb-8">
                                         <div className="text-gray-400 mb-2">Current Bid</div>
                                         <div className="text-6xl md:text-7xl font-bold text-green-400">
-                                            ₹{currentBid}
+                                            {formatPriceWithSymbol(currentBid)}
                                         </div>
                                         {highestBidder && (
                                             <div className="mt-2 text-xl" style={{ color: teams.find(t => t.id === highestBidder)?.color }}>
@@ -484,11 +487,11 @@ export default function AuctionPage() {
                                                 >
                                                     <div>{team.name}</div>
                                                     <div className="text-sm opacity-80 mt-1">
-                                                        Budget: ₹{team.budget}
+                                                        Budget: {formatPriceWithSymbol(team.budget)}
                                                     </div>
                                                     {!isHighestBidder && canAfford && (
                                                         <div className="text-sm mt-2 bg-black/30 rounded-lg py-1">
-                                                            Bid ₹{nextBid}
+                                                            Bid {formatPriceWithSymbol(nextBid)}
                                                         </div>
                                                     )}
                                                     {isHighestBidder && (
@@ -560,7 +563,7 @@ export default function AuctionPage() {
                                         <div key={team.id} className="p-3 bg-gray-800 rounded-xl">
                                             <div className="flex items-center justify-between mb-2">
                                                 <div className="font-bold" style={{ color: team.color }}>{team.name}</div>
-                                                <div className="text-green-400 font-bold">₹{team.budget}</div>
+                                                <div className="text-green-400 font-bold">{formatPriceWithSymbol(team.budget)}</div>
                                             </div>
                                             <div className="text-sm text-gray-400">
                                                 {teamPlayers.length} players

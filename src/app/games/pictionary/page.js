@@ -75,8 +75,12 @@ export default function PictionaryPage() {
     const handleConfirmScore = () => {
         const score = calculateScore();
         const team = teams.find((t) => t.id === selectedTeamId);
-        if (team && score.total > 0) {
-            updateTeam(selectedTeamId, { score: team.score + score.total });
+        if (team) {
+            // Update score AND increment pictionaryRounds in database
+            updateTeam(selectedTeamId, { 
+                score: team.score + score.total,
+                pictionaryRounds: (team.pictionaryRounds || 0) + 1
+            });
         }
         setLastRoundScore(score);
         resetForNextRound();

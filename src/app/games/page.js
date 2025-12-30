@@ -35,6 +35,22 @@ const GAMES = [
         color: 'from-green-600 to-emerald-600',
         href: '/games/pen-fight',
     },
+    {
+        id: 'guess-the-word',
+        name: 'Guess the Word',
+        description: 'One gives clues, one guesses - find all 5 words before time runs out!',
+        icon: '💬',
+        color: 'from-yellow-600 to-amber-600',
+        href: '/games/guess-the-word',
+    },
+    {
+        id: 'beer-pong',
+        name: 'Beer Pong',
+        description: 'All team members throw - 5 shots each, score points for every cup!',
+        icon: '🍺',
+        color: 'from-red-600 to-rose-600',
+        href: '/games/beer-pong',
+    },
 ];
 
 export default function GamesPage() {

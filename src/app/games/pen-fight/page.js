@@ -79,10 +79,18 @@ export default function PenFightPage() {
         const team2 = teams.find(t => t.id === selectedTeam2Id);
 
         if (team1) {
-            updateTeam(selectedTeam1Id, { score: team1.score + team1Score });
+            // Update score AND increment penFightRounds in database
+            updateTeam(selectedTeam1Id, { 
+                score: team1.score + team1Score,
+                penFightRounds: (team1.penFightRounds || 0) + 1
+            });
         }
         if (team2) {
-            updateTeam(selectedTeam2Id, { score: team2.score + team2Score });
+            // Update score AND increment penFightRounds in database
+            updateTeam(selectedTeam2Id, { 
+                score: team2.score + team2Score,
+                penFightRounds: (team2.penFightRounds || 0) + 1
+            });
         }
 
         setGameSubmitted(true);

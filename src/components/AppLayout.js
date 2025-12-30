@@ -1,6 +1,7 @@
 'use client';
 
 import Sidebar from '@/components/Sidebar';
+import ScoreStrip from '@/components/ScoreStrip';
 import { usePathname } from 'next/navigation';
 
 export default function AppLayout({ children }) {
@@ -15,10 +16,12 @@ export default function AppLayout({ children }) {
 
     return (
         <div className="flex min-h-screen">
+            <ScoreStrip />
             <Sidebar />
-            <main className="flex-1 ml-60">
+            <main className="flex-1 ml-60 pt-10">
                 {children}
             </main>
         </div>
     );
 }
+
